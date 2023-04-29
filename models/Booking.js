@@ -19,6 +19,10 @@ const BookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  complete: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 module.exports = mongoose.model('Booking', BookingSchema)

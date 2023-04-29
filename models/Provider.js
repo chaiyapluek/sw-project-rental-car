@@ -35,7 +35,11 @@ const ProviderSchema = new mongoose.Schema(
     // },
     images: {
       type: [String],
-    }
+    },
+    pic: {
+      type: String,
+      default: '',
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -56,6 +60,7 @@ ProviderSchema.virtual('bookings', {
   localField: '_id',
   foreignField: 'provider',
   justOne: false,
+  
 })
 
 module.exports = mongoose.model('Provider', ProviderSchema)

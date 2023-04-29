@@ -62,14 +62,14 @@ exports.getProviders = async (req, res, next) => {
 		// Executing query
 		const providers = await query;
 
-    // Add s3 domain to key
-    const providersWithUrl = providers.map((provider) => {
-      const urls = provider.images.map((image) => {
-        return process.env.S3_DOMAIN + image;
-      });
-      provider.images = urls;
-      return provider;
-    });
+		// Add s3 domain to key
+		const providersWithUrl = providers.map((provider) => {
+			const urls = provider.images.map((image) => {
+				return process.env.S3_DOMAIN + image;
+			});
+			provider.images = urls;
+			return provider;
+		});
 
 		// Pagination result
 		const pagination = {};
@@ -111,10 +111,10 @@ exports.getProvider = async (req, res, next) => {
 				success: false,
 			});
 		}
-    const urls = provider.images.map((image) => {
-      return process.env.S3_DOMAIN + image;
-    });
-    provider.images = urls;
+		const urls = provider.images.map((image) => {
+			return process.env.S3_DOMAIN + image;
+		});
+		provider.images = urls;
 		res.status(200).json({
 			success: true,
 			data: provider,
@@ -177,9 +177,9 @@ exports.deleteProvider = async (req, res, next) => {
 				success: false,
 			});
 		}
-    provider.images.forEach(async (key) => {
-      await deletefn(key);
-    });
+		provider.images.forEach(async (key) => {
+			await deletefn(key);
+		});
 		provider.remove();
 		res.status(200).json({
 			success: true,
@@ -208,19 +208,19 @@ exports.providerImageUpload = async (req, res, next) => {
 				success: false,
 			});
 		}
-    const result = await uploadfn(req.user.id, req.files);
-    provider.images = [...provider.images, ...result]
-    await provider.save();
-    const urls = provider.images.map((image) => {
-      return process.env.S3_DOMAIN + image;
-    });
-    provider.images = urls;
-    res.status(200).json({
-      success: true,
-      data: provider,
-    });
+		const result = await uploadfn(req.user.id, req.files);
+		provider.images = [...provider.images, ...result];
+		await provider.save();
+		const urls = provider.images.map((image) => {
+			return process.env.S3_DOMAIN + image;
+		});
+		provider.images = urls;
+		res.status(200).json({
+			success: true,
+			data: provider,
+		});
 	} catch (err) {
-    console.log(err);
+		console.log(err);
 		res.status(400).json({
 			success: false,
 		});
@@ -228,31 +228,33 @@ exports.providerImageUpload = async (req, res, next) => {
 };
 
 exports.providerImageDelete = async (req, res, next) => {
-  try{
-    const provider = await Provider.findById(req.params.id);
+	try {
+		const provider = await Provider.findById(req.params.id);
 		if (!provider) {
 			return res.status(404).json({
 				success: false,
-        message: "provider not found"
+				message: "provider not found",
 			});
 		}
-    isExist = provider.images.includes(req.body.key);
-    if(!isExist){
-      return res.status(404).json({
-        success: false,
-        message: "image not found"
-      });
-    }
-    const result = await deletefn(req.body.key);
-    provider.images = provider.images.filter((image) => image !== req.body.key);
-    await provider.save();
-    res.status(200).json({
-      success: true,
-    });
-  }catch(err){
-    res.status(500).json({
-      success: false,
-      message: "something went wrong"
-    });
-  }
-}
+		isExist = provider.images.includes(req.body.key);
+		if (!isExist) {
+			return res.status(404).json({
+				success: false,
+				message: "image not found",
+			});
+		}
+		const result = await deletefn(req.body.key);
+		provider.images = provider.images.filter(
+			(image) => image !== req.body.key
+		);
+		await provider.save();
+		res.status(200).json({
+			success: true,
+		});
+	} catch (err) {
+		res.status(500).json({
+			success: false,
+			message: "something went wrong",
+		});
+	}
+};

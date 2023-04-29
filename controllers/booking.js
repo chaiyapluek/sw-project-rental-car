@@ -6,18 +6,42 @@ const Provider = require('../models/Provider')
 // @access  Public
 exports.getBookings = async (req, res, next) => {
   let query
+  const options = {
+    complete:
+      req.query.complete === 'true'
+        ? true
+        : req.query.complete === 'false'
+        ? false
+        : { $ne: null },
+  }
 
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'admin' || req.query.all === 'false') {
     // General users can see only their bookings!
-    query = Booking.find({ user: req.user.id }).populate({
+    query = Booking.find({ user: req.user.id, ...options }).populate({
       path: 'provider',
-      select: 'name province tel',
+      select: 'name tel address pic',
+      transform: (doc) => ({
+        // ...doc,
+        _id: doc._id,
+        name: doc.name,
+        tel: doc.tel,
+        address: doc.address,
+        pic: process.env.S3_DOMAIN + doc.pic,
+      }),
     })
   } else {
     // If you are an admin, you can see all!
-    query = Booking.find().populate({
+    query = Booking.find({ ...options }).populate({
       path: 'provider',
-      select: 'name province tel',
+      select: 'name tel address pic',
+      transform: (doc) => ({
+        // ...doc,
+        _id: doc._id,
+        name: doc.name,
+        tel: doc.tel,
+        address: doc.address,
+        pic: process.env.S3_DOMAIN + doc.pic,
+      }),
     })
   }
   try {
@@ -89,6 +113,7 @@ exports.addBooking = async (req, res, next) => {
     // Check for existing booking
     const existingBookings = await Booking.find({
       user: req.user.id,
+      complete: false,
     })
 
     // If the user is not an admin, they can only create 3 bookings.

@@ -38,7 +38,7 @@ const ProviderSchema = new mongoose.Schema(
     },
     pic: {
       type: String,
-      default: '',
+      default: "default.png",
     },
   },
   {
